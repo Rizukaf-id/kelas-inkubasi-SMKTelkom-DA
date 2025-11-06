@@ -1,0 +1,94 @@
+<div>Teachable Machine Image Model</div>
+<button type="button" onclick="init()">Start Webcam</button>
+
+<div style="margin:8px 0;">
+    <label for="file-input">Or upload an image:</label>
+    <input id="file-input" type="file" accept="image/*" />
+</div>
+
+<div id="webcam-container"></div>
+<img id="image-preview" alt="preview" style="max-width: 220px; display:none; margin-top:8px;" />
+<div id="label-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+<script type="text/javascript">
+    // More API functions here:
+    // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+
+    // the link to your model provided by Teachable Machine export panel
+    // NOTE: Do NOT name this variable `URL` because it shadows window.URL used by createObjectURL
+    const MODEL_BASE = "../../models/tfjs/";
+
+    let model, webcam, labelContainer, maxPredictions, labelsReady = false;
+
+    async function ensureModelLoaded() {
+        if (!model) {
+            const modelURL = MODEL_BASE + "model.json";
+            const metadataURL = MODEL_BASE + "metadata.json";
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+        }
+        if (!labelContainer) {
+            labelContainer = document.getElementById("label-container");
+        }
+        if (!labelsReady && maxPredictions) {
+            labelContainer.innerHTML = "";
+            for (let i = 0; i < maxPredictions; i++) {
+                labelContainer.appendChild(document.createElement("div"));
+            }
+            labelsReady = true;
+        }
+    }
+
+    // Load the image model and setup the webcam
+    async function init() {
+    // load the model and metadata if needed
+    await ensureModelLoaded();
+
+        // Convenience function to setup a webcam
+        const flip = true; // whether to flip the webcam
+        webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
+        await webcam.setup(); // request access to the webcam
+        await webcam.play();
+        window.requestAnimationFrame(loop);
+
+        // append elements to the DOM
+        document.getElementById("webcam-container").appendChild(webcam.canvas);
+    }
+
+    async function loop() {
+        webcam.update(); // update the webcam frame
+        await predict();
+        window.requestAnimationFrame(loop);
+    }
+
+    async function predictOnElement(el) {
+        const prediction = await model.predict(el);
+        for (let i = 0; i < maxPredictions; i++) {
+            const classPrediction =
+                prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+            labelContainer.childNodes[i].innerHTML = classPrediction;
+        }
+    }
+
+    // run the webcam image through the image model
+    async function predict() {
+        if (!model) return;
+        await predictOnElement(webcam.canvas);
+    }
+
+    // handle file upload path
+    document.getElementById("file-input").addEventListener("change", async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        await ensureModelLoaded();
+        const img = document.getElementById("image-preview");
+    const objectUrl = (window.URL || window.webkitURL).createObjectURL(file);
+        img.onload = async () => {
+            img.style.display = "block";
+            await predictOnElement(img);
+            URL.revokeObjectURL(objectUrl);
+        };
+        img.src = objectUrl;
+    });
+</script>
