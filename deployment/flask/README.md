@@ -1,5 +1,7 @@
 # Demo Prediksi Cuaca Sederhana (Flask)
 
+![alt text](image.png)
+
 Tujuan: jalankan model `.pkl` dan pakai lewat browser atau API. Aplikasi dibuat simpel: hanya 1 file `app.py`.
 
 - Lokasi model: `models/random-forest-model.pkl`

@@ -1,5 +1,7 @@
 # Demo Prediksi Cuaca Sederhana (FastAPI)
 
+![alt text](image.png)
+
 Tujuan: jalankan model yang disimpan di file `.pkl` dan pakai lewat browser atau API. Dibuat sesederhana mungkin: cukup 1 file `app.py`.
 
 - Lokasi model: `models/random-forest-model.pkl`

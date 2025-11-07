@@ -1,5 +1,7 @@
 # Panduan Singkat: Jalankan Model Teachable Machine di Browser (TensorFlow.js)
 
+![alt text](image.png)
+
 Tujuan: bikin halaman web sederhana yang bisa menjalankan model gambar langsung di browser. Tidak perlu server Python/Flask, cukup file HTML + file model TFJS.
 
 - Halaman demo: `index.html`
